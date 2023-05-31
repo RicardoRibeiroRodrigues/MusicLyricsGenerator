@@ -127,27 +127,27 @@ print(vectorize_layer.get_vocabulary()[0:100])
 N = 10
 TOKEN_REGEX = r'\b\w+\b'
 def get_last_token(x):
-        """
-        Function to map the dataset to (x, y) pairs.
-        The y is last token of x.
-        x is output of vectorization - last token.
-        """
-        X = []
-        Y = []
+    """
+    Function to map the dataset to (x, y) pairs.
+    The y is last token of x.
+    x is output of vectorization - last token.
+    """
+    X = []
+    Y = []
 
-        for music in x:
-            # music = x['lyrics']
-            # i = 0
-            tokens = re.findall(TOKEN_REGEX, music)
-            # Get one random part of the music
-            i = randint(0, len(tokens) - N - 1)
-            X.append(" ".join(tokens[i:i+N]))
-            Y.append(str(tokens[i+N]))
-            # i += N
-            
-            # X.append(vectorize_layer(x_tokens))
-            # Y.append(vectorize_layer(y_tokens))
-        return (np.array(X), np.array(Y))
+    for music in x:
+        # music = x['lyrics']
+        # i = 0
+        tokens = re.findall(TOKEN_REGEX, music)
+        # Get one random part of the music
+        i = randint(0, len(tokens) - N - 1)
+        X.append(" ".join(tokens[i:i+N]))
+        Y.append(str(tokens[i+N]))
+        # i += N
+        
+        # X.append(vectorize_layer(x_tokens))
+        # Y.append(vectorize_layer(y_tokens))
+    return (np.array(X), np.array(Y))
 
 class BatchDatasetTrain(tf.keras.utils.Sequence):    
     def __init__(self, dataset_spark, batch_size, dataset_len, vectorizer):
@@ -215,8 +215,8 @@ print("Saving the model")
 predictor.save("modelo_inhouse")
 
 # Plot validation curves
-plt.plot(history.history['val_loss'], label='Validation Loss')
-plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.plot(history.history['loss'], label='loss')
+plt.plot(history.history['val_loss'], label='val_loss')
 plt.xlabel('Epoch')
 plt.ylabel('Value')
 plt.legend()
