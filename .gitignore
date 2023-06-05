@@ -2,3 +2,10 @@
 env/
 .zip
 .csv
+*.txt
+*.zip
+*.csv
+models/
+*.parquet
+training_1/
+training_2/

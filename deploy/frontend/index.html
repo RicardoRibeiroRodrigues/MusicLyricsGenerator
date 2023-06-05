@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Generation API</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+<body>
+    <div class="container">
+        <h1 class="title">Music Generation API</h1>
+        <div class="input-wrapper">
+            <input type="text" class="input-text" id="input-text" placeholder="Enter text">
+            <!-- <label for="input-text">Input Text:</label> -->
+            <!-- <textarea class="form-control" id="input-text" rows="5" placeholder="Enter your text..."></textarea> -->
+            <input type="number" class="input-number" id="input-number" placeholder="N" value="10">
+            <button class="generate-button" onclick="generateText()">Generate</button>
+        </div>
+        <button class="generate-button" onclick="load_snippet()">Load Snippet</button>
+
+        <div class="container-output">
+            <p class="output" id="output"></p>
+            <p class="output" id="model_name"></p>
+            <p id="output_snippet"></p>
+        </div>
+    </div>
+
+    <script>
+        const url = "http://127.0.0.1:8000"
+
+        async function generateText() {
+            const text = document.getElementById("input-text").value;
+            const n = document.getElementById("input-number").value;
+
+            const response = await fetch(url + '/generate_text', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text: text, n: n })
+            });
+
+            const data = await response.json();
+            document.getElementById("output").textContent = data.generated_text;
+            console.log(data.model_used);
+            document.getElementById("model_name").textContent = data.model_used;
+        }
+
+        async function load_snippet() {
+            const response = await fetch(url + '/random_snippet', {
+                method: 'GET',
+            });
+
+            // The response is a string
+            const data = await response.json();
+            console.log(data);
+            document.getElementById("output_snippet").textContent = data;
+        }
+    </script>
+</body>
+
+</html>
