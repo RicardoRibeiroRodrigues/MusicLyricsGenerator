@@ -12,8 +12,15 @@
 <body>
     <div class="container">
         <h1 class="title">Music Generation API</h1>
+        <select class="select-dropdown" id="model-select">
+            <option class="select-dropdown-option" value="0">Random</option>
+            <option class="select-dropdown-option" value="1">Baseline</option>
+            <option class="select-dropdown-option" value="2">InHouse</option>
+            <option class="select-dropdown-option" value="3">Glove + Inhouse</option>
+            <option class="select-dropdown-option" value="4">GPT-2</option>
+        </select>
         <div class="input-wrapper">
-            <input type="text" class="input-text" id="input-text" placeholder="Enter text">
+            <input type="text" class="input-text" id="input-text" placeholder="Enter your lyrics">
             <!-- <label for="input-text">Input Text:</label> -->
             <!-- <textarea class="form-control" id="input-text" rows="5" placeholder="Enter your text..."></textarea> -->
             <input type="number" class="input-number" id="input-number" placeholder="N" value="10">
@@ -22,9 +29,15 @@
         <button class="generate-button" onclick="load_snippet()">Load Snippet</button>
 
         <div class="container-output">
-            <p class="output" id="output"></p>
-            <p class="output" id="model_name"></p>
-            <p id="output_snippet"></p>
+            <div class="output-section">
+                    <h2 class="output-title">Generated Text</h2>
+                <p class="output" id="output"></p>
+                <p id="model_name"></p>
+            </div>
+            <div class="output-section">
+                <h2 class="output-title">Snippet</h2>
+                <p id="output_snippet"></p>
+            </div>
         </div>
     </div>
 
@@ -34,13 +47,14 @@
         async function generateText() {
             const text = document.getElementById("input-text").value;
             const n = document.getElementById("input-number").value;
+            const model = document.getElementById("model-select").value;
 
             const response = await fetch(url + '/generate_text', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ text: text, n: n })
+                body: JSON.stringify({ text: text, n: n, model_n: model})
             });
 
             const data = await response.json();

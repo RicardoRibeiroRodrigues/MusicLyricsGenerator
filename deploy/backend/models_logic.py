@@ -40,17 +40,16 @@ def baseline_generate(text, n_tokens):
     return text + " " + ' '.join(texto_gerado)
 
 
-def neural_network_generate(model_id, model, vectorizer, lyrics, n_new_tokens=10) -> str:
+def neural_network_generate(model, vectorizer, lyrics, n_new_tokens=10, random_weight=1) -> str:
     context = lyrics
     phrase = [lyrics]
     voc = vectorizer.get_vocabulary()
 
     for _ in range(n_new_tokens):
         vectorized = vectorizer([context])
-        # if model_id == 1:
-        #     pred = model.predict(vectorized[:,:-1])
-        # else:
         pred = model.predict(vectorized)
+        temperatura = np.random.rand(len(pred))
+        pred = pred + temperatura * random_weight
         n_iter = 0
 
         while True:
@@ -59,7 +58,8 @@ def neural_network_generate(model_id, model, vectorizer, lyrics, n_new_tokens=10
             idx = np.random.choice(k_best_predictions.numpy())
             word = voc[idx]
 
-            if word in phrase or word == '' or word == ' ':
+            bad_words = {'[UNK]', '', ' '}
+            if word in phrase or word in bad_words:
                 pred[0][idx] = 0
             else:
                 break
@@ -84,14 +84,15 @@ def gpt_2_generate(text, n_tokens) -> str:
     return generated_text.replace(prompt_text, '')
 
 
-def generate_with_random_model(base_text, n) -> tuple:
-    model_number = randint(0, 3)
+def generate_lyrics(base_text, n, model_number=0) -> tuple:
     if model_number == 0:
+        model_number = randint(1, 4)
+    if model_number == 1:
         res = baseline_generate(base_text, n), 'baseline'
-    elif model_number ==  1:
-        res = neural_network_generate(1, inhouse, vectorizer, base_text, n), 'inhouse'
-    elif model_number == 2:
-        res = neural_network_generate(2, glove, vec_glove, base_text, n), 'glove'
+    elif model_number ==  2:
+        res = neural_network_generate(inhouse, vectorizer, base_text, n), 'inhouse'
+    elif model_number == 3:
+        res = neural_network_generate(glove, vec_glove, base_text, n), 'glove'
     else:
         res = gpt_2_generate(base_text, n), 'gpt2'
     return res

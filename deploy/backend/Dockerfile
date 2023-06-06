@@ -1,10 +1,10 @@
 # Dockerfile for TensorFlow GPU and FastAPI
 
 # Use the latest TensorFlow GPU version as the base image
-FROM tensorflow/tensorflow:latest-gpu
+# FROM tensorflow/tensorflow:latest-gpu
 
 # Uncomment the line below and comment the above line to use CPU version instead
-# FROM tensorflow/tensorflow:latest
+FROM tensorflow/tensorflow:latest
 
 # Set the working directory in the container
 WORKDIR /app
@@ -29,3 +29,4 @@ EXPOSE 8000
 
 # Start the FastAPI application
 CMD ["uvicorn", "model_api:app", "--host", "0.0.0.0", "--port", "8000"]
+# CMD ["bash"]

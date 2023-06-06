@@ -22,50 +22,9 @@ from random import randint
 spark = SparkSession.builder \
     .appName('MusicGen') \
     .master("local[*]") \
-    .config("spark.default.parallelism", "10") \
-    .config("spark.executor.cores", "7") \
     .getOrCreate()
 
 sc = spark.sparkContext
-
-# schema = StructType() \
-#       .add("title", StringType(),True) \
-#       .add("tag", StringType(), True) \
-#       .add("artist", StringType(), True) \
-#       .add("year", IntegerType(), True) \
-#       .add("views", IntegerType(), True) \
-#       .add("features", StringType(), True) \
-#       .add("lyrics", StringType(), False) \
-#       .add("id", IntegerType(), True) \
-#       .add("language_cld3", StringType(), True) \
-#       .add("language_ft", StringType(), True) \
-#       .add("language", StringType(), True)
-
-# # df = spark.read.csv("song_lyrics.csv")
-# # df.printSchema()
-# DATASET_PATH = "song_lyrics.csv"
-# df = spark.read.format("csv") \
-#       .option("header", True) \
-#       .option("multiLine", True) \
-#       .option("escape","\"") \
-#       .schema(schema) \
-#       .load(DATASET_PATH)
-# df.printSchema()
-
-# print(df.rdd.getNumPartitions())
-# print(sc.getConf().get("spark.executor.cores"))
-# print(sc.getConf().get("spark.default.parallelism"))
-
-# cols = ("artist", "year", "views", "id", "language_cld3", "language_ft")
-
-# df = df.drop(*cols)
-# df = df.filter("tag = 'pop' AND language = 'en'")
-# print("Number of pop musics in english: ", df.count())
-
-# seed = 69
-# train, test = df.randomSplit([0.8, 0.2], seed)
-
-# train = train.select("*").withColumn("id", monotonically_increasing_id())
 
 train = spark.read.format("parquet").load("train.parquet")
 train.printSchema()
@@ -92,7 +51,7 @@ class BatchDataset(tf.keras.utils.Sequence):
         return X
         
 
-vocab_size = 10_000
+vocab_size = 15_000
 n_grams = 10
 batch_size = 8_192
 dataset = BatchDataset(train, batch_size, n_rows)
@@ -102,7 +61,7 @@ vectorize_layer = TextVectorization(
     )
 
 print("Adaptando o vetorizador")
-# vectorize_layer.adapt(dataset)
+vectorize_layer.adapt(dataset)
 
 model = tf.keras.models.Sequential([
     tf.keras.Input(shape=(1, ), dtype=tf.string),
@@ -111,15 +70,15 @@ model = tf.keras.models.Sequential([
 filepath = "vectorizer-model"
 model.compile()
 # model.load_weights(filepath)
-loaded_model = tf.keras.models.load_model(filepath)
+# loaded_model = tf.keras.models.load_model(filepath)
 
 # print("Depois do Load")
-vectorize_layer = loaded_model.layers[0]
+# vectorize_layer = loaded_model.layers[0]
 print(vectorize_layer.get_vocabulary()[0:100])
 
 # # Save.
 # print("Salvando o vetorizador")
-# model.save(filepath)
+model.save(filepath)
 # print("Vetorizador foi salvo!")
 
 
@@ -143,10 +102,6 @@ def get_last_token(x):
         i = randint(0, len(tokens) - N - 1)
         X.append(" ".join(tokens[i:i+N]))
         Y.append(str(tokens[i+N]))
-        # i += N
-        
-        # X.append(vectorize_layer(x_tokens))
-        # Y.append(vectorize_layer(y_tokens))
     return (np.array(X), np.array(Y))
 
 class BatchDatasetTrain(tf.keras.utils.Sequence):    
@@ -177,7 +132,7 @@ vocab_size = vectorize_layer.vocabulary_size()
 print("VOCAB SIZE: ", vocab_size)
 
 def predict_word(seq_len, latent_dim, vocab_size):
-    input_layer = Input(shape=(seq_len-1,))
+    input_layer = Input(shape=(seq_len,))
     x = input_layer
     x = Embedding(vocab_size, latent_dim, name='embedding', mask_zero=True)(x)
     x = MultiHeadAttention(num_heads=3, key_dim=2)(x, value=x)
@@ -208,18 +163,8 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(
 
 predictor.compile(loss=loss_fn, optimizer=opt, metrics=["accuracy"])
 
-history = predictor.fit(dataset_train, epochs=50, verbose=1, callbacks=[cp_callback])
+history = predictor.fit(dataset_train, epochs=100, verbose=1, callbacks=[cp_callback])
 # history = predictor.fit(dataset_train, epochs=50, verbose=1)
 
 print("Saving the model")
 predictor.save("modelo_inhouse")
-
-# Plot validation curves
-plt.plot(history.history['loss'], label='loss')
-plt.plot(history.history['val_loss'], label='val_loss')
-plt.xlabel('Epoch')
-plt.ylabel('Value')
-plt.legend()
-
-# Save the figure
-plt.savefig('validation_curves.png')

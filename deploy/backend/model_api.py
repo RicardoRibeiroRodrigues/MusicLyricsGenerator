@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from models_logic import generate_with_random_model
+from models_logic import generate_lyrics
 from random import randint
 
 
@@ -18,6 +18,7 @@ app.add_middleware(
 class TextRequest(BaseModel):
     text: str
     n: int = 20
+    model_n: int = 0
 
 class TextResponse(BaseModel):
     generated_text: str
@@ -32,7 +33,7 @@ def read_root():
 @app.get("/random_snippet")
 def random_snippet() -> str:
     """
-    Returns a random snippet from the dataset
+    Returns a random snippet from the test dataset
     """
     random_line = randint(0, 270_000)
     with open('snippets.csv', 'r', encoding='utf-8') as f:
@@ -46,7 +47,7 @@ def generate_text_endpoint(request: TextRequest) -> TextResponse:
     """
     Generates text using a random model
     """
-    res = generate_with_random_model(request.text, request.n)
+    res = generate_lyrics(request.text, request.n, request.model_n)
     response = TextResponse(generated_text=res[0], model_used=res[1])
     print(response)
     return response
