@@ -49,7 +49,7 @@ def complete_song(lyrics, n_new_tokens=10) -> str:
 
     for _ in range(n_new_tokens):
         vectorized = vectorizer([context])
-        pred = model.predict(vectorized[:,:-1])
+        pred = model.predict(vectorized)
 
         while True:
             candidatos = tf.math.top_k(pred, k=10).indices[0,:]
@@ -86,7 +86,7 @@ def got_row_right(row):
     i = randint(0, len(tokens) - N - 1)
     text = " ".join(tokens[i:i+N])
     vectorized = vectorizer([text])
-    pred = model.predict(vectorized[:,:-1], verbose=0)
+    pred = model.predict(vectorized, verbose=0)
     idx = tf.argmax(pred, axis=1)[0]
     word = vectorizer.get_vocabulary()[idx]
 
@@ -104,7 +104,7 @@ for _ in range(10):
     print(res.iloc[0])
     snippet_vectorized = vectorizer(res['snippet'].to_numpy())
     print("Fez a vetorizacao")
-    pred = model.predict(snippet_vectorized[:,:-1], verbose=1)
+    pred = model.predict(snippet_vectorized, verbose=1)
     print("Fez as predicoes")
     idx = tf.argmax(pred, axis=1)
     print("Fez o argmax")
