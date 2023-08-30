@@ -1,24 +1,23 @@
-# Deploy dos modelos
+# Model Deployment
 
-Para rodar local:
-1. Rode uma das versões do docker do deploy do backend:
+To run locally:
+1. Run one of the Docker versions for deploying the backend:
 
-Para usar a CPU nas inferências:
+To use CPU for inference:
 
 ```sh
 docker run -p 8000:8000 ricardorr7/deploy-api-musicgen:latest-cpu
 ```
 
-Para usar a GPU nas inferências:
+To use GPU for inference:
 
 ```sh
 docker run -p 8000:8000 ricardorr7/deploy-api-musicgen:latest-gpu
 ```
 
-2. Em seguida, com o docker rodando, suba um servidor http para o frontend:
+2. Then, with Docker running, start an HTTP server for the frontend:
 ```sh
 python -m http.server 8080 --directory ./frontend
 ```
 
-(Funciona apenas arrastando o arquivo .html para o navegador também)
-
+(You can also simply drag the .html file into your web browser.)
